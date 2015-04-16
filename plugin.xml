@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<plugin xmlns="http://apache.org/cordova/ns/plugins/1.0"
+        id="nl.x-services.plugins.researchkit"
+        version="0.0.1">
+
+  <name>ResearchKit</name>
+
+  <description>
+    Do surveys and whatnot with Apple's ResearchKit
+  </description>
+
+  <author>Eddy Verbruggen</author>
+
+  <license>MIT</license>
+
+  <keywords>ResearchKit, Research, Survey</keywords>
+
+  <repo>https://github.com/EddyVerbruggen/cordova-plugin-researchkit.git</repo>
+
+  <issue>https://github.com/EddyVerbruggen/cordova-plugin-researchkit/issues</issue>
+
+  <engines>
+    <engine name="cordova" version=">=3.0.0"/>
+  </engines>
+
+  <js-module src="www/ResearchKit.js" name="ResearchKit">
+    <clobbers target="window.plugins.researchkit" />
+  </js-module>
+
+  <!-- ios -->
+  <platform name="ios">
+
+    <config-file target="config.xml" parent="/*">
+      <feature name="ResearchKit">
+        <param name="ios-package" value="ResearchKit"/>
+      </feature>
+    </config-file>
+
+    <framework src="src/ios/lib/ResearchKit.framework" custom="true" />
+    <framework src="HealthKit.framework" weak="true" />
+
+    <header-file src="src/ios/ResearchKit.h"/>
+    <source-file src="src/ios/ResearchKit.m"/>
+  </platform>
+
+</plugin>
