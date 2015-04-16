@@ -11,6 +11,8 @@ This is in proof of concept phase, do not use yet plz.
 Install note:
 
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-After the CLI commands, GO TO TARGET > GENERAL > EMBEDDED BINARIES > + > ResearchKit.framework
+
+Installation warning: after `cordova plugin add ..` go to TARGET > GENERAL > EMBEDDED BINARIES > + > ResearchKit.framework
 (see https://github.com/researchkit/researchkit#gettingstarted)
+
 !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
