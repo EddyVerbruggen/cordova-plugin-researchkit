@@ -16,7 +16,7 @@ At the moment this plugin can only be used for surveys / questionnaires.
 [See the demo](demo/index.html) to learn how to use the plugin.
 the supported answer formats currently are:
 
-### ORKBooleanAnswerFormat (user must choose yes/no)
+#### ORKBooleanAnswerFormat (user must choose yes/no)
 ```js
   {
     'id': 'question1',
@@ -24,9 +24,9 @@ the supported answer formats currently are:
     'answerFormat' : 'ORKBooleanAnswerFormat' // or 'boolean'
   }
 ```
-<img src="img/answerformats/BooleanAnswerFormat.png" width="375px" height="356px"/>
+<img src="img/answerformats/BooleanAnswerFormat.png" width="375px" height="667px"/>
 
-### ORKNumericAnswerFormat (user must enter a number)
+#### ORKNumericAnswerFormat (user must enter a number)
 ```js
   {
     'id': 'question2',
@@ -37,6 +37,6 @@ the supported answer formats currently are:
     'maximum': 80  // optional
   }
 ```
-<img src="img/answerformats/NumericAnswerFormat.png" width="200px" height="356px"/>
+<img src="img/answerformats/NumericAnswerFormat.png" width="375px" height="667px"/>
 
-### More formats will be added soon
+#### More formats will be added soon
