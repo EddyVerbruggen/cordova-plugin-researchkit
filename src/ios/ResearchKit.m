@@ -1,9 +1,5 @@
 #import "ResearchKit.h"
 
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-// TODO useful implementation as this is merely a PoC
-// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
 @implementation ResearchKit
 
 - (void) isAvailable:(CDVInvokedUrlCommand*)command; {
@@ -16,21 +12,41 @@
 
   // remember the command, because we need it in the delegate
   _command = command;
-  
+
+  // let's see what's passed in
+  NSMutableDictionary *args = [command.arguments objectAtIndex:0];
+  NSMutableDictionary *instructionSteps = [args objectForKey:@"instructionSteps"];
+//  NSArray *consentSteps = [args objectForKey:@"consentSteps"]; // TODO not sure about the name
+  NSMutableDictionary *questionSteps = [args objectForKey:@"questionSteps"];
+
   [self.commandDelegate runInBackground:^{
 
-    ORKInstructionStep *instructionStep = [[ORKInstructionStep alloc] initWithIdentifier:@"intro"];
-    instructionStep.title = @"ResearchKit + Cordova = Awesome";
-    instructionStep.text = @"This is the text, dude :)";
+    NSMutableArray *steps = [[NSMutableArray alloc] initWithCapacity:instructionSteps.count + questionSteps.count];
 
-    ORKNumericAnswerFormat *format = [ORKNumericAnswerFormat integerAnswerFormatWithUnit:@"years"];
-    format.minimum = @(18);
-    format.maximum = @(90);
-    ORKQuestionStep *questionStep = [ORKQuestionStep questionStepWithIdentifier:@"step1"
-                                                                          title:@"How old are you?"
-                                                                         answer:format];
+    // instruction steps
+    for (NSDictionary *instructionStep in instructionSteps) {
+      NSString *id = [instructionStep objectForKey:@"id"];
+      NSString *title = [instructionStep objectForKey:@"title"];
+      NSString *text = [instructionStep objectForKey:@"text"];
+      ORKInstructionStep *step = [[ORKInstructionStep alloc] initWithIdentifier:id];
+      step.title = title;
+      step.text = text;
+      // TODO nice additions
+      // step.image = [UIImage ..]
+      // step.detailText = @"details here";
+      [steps addObject:step];
+    }
 
-    ORKOrderedTask *task = [[ORKOrderedTask alloc] initWithIdentifier:@"task" steps:@[instructionStep, questionStep]];
+    // question steps
+    for (NSDictionary *questionStep in questionSteps) {
+      NSString *id = [questionStep objectForKey:@"id"];
+      NSString *title = [questionStep objectForKey:@"title"];
+      ORKAnswerFormat *format = [self getORKAnswerFormat:questionStep];
+      ORKQuestionStep *step = [ORKQuestionStep questionStepWithIdentifier:id title:title answer:format];
+      [steps addObject:step];
+    }
+
+    ORKOrderedTask *task = [[ORKOrderedTask alloc] initWithIdentifier:@"task" steps:steps];
   
     ORKTaskViewController *taskViewController = [[ORKTaskViewController alloc] initWithTask:task taskRunUUID:nil];
     taskViewController.delegate = self;
@@ -39,11 +55,38 @@
   }];
 }
 
+- (ORKAnswerFormat*) getORKAnswerFormat:(NSDictionary*) questionStep {
+  NSString *answerFormat = [questionStep objectForKey:@"answerFormat"];
+
+  if ([answerFormat isEqualToString: @"ORKBooleanAnswerFormat"] || [answerFormat isEqualToString: @"boolean"]) {
+    return [ORKBooleanAnswerFormat booleanAnswerFormat];
+
+  } else if ([answerFormat isEqualToString: @"ORKNumericAnswerFormat"] || [answerFormat isEqualToString: @"numeric"]) {
+    NSString *unit = [questionStep objectForKey:@"unit"];
+    NSNumber *minimum = [questionStep objectForKey:@"minimum"];
+    NSNumber *maximum = [questionStep objectForKey:@"maximum"];
+    ORKNumericAnswerFormat *format = [ORKNumericAnswerFormat integerAnswerFormatWithUnit:unit]; // e.g. "years"
+    format.minimum = minimum;
+    format.maximum = maximum;
+    return format;
+
+  } else {
+    return nil;
+  }
+}
+
 // ORKTaskViewControllerDelegate
 - (void)taskViewController:(ORKTaskViewController *)taskViewController
        didFinishWithReason:(ORKTaskViewControllerFinishReason)reason
                      error:(NSError *)error {
 
+  if (reason != ORKTaskViewControllerFinishReasonCompleted) {
+    [self.viewController dismissViewControllerAnimated:YES completion:nil];
+    CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR]; // TODO a nice reason
+    [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
+    return;
+  }
+  
   ORKTaskResult *taskResult = [taskViewController result];
   // You could do something with the result here.
 
@@ -60,9 +103,12 @@
     for (ORKQuestionResult *qres in questionResults) {
       NSString *unit;
       NSNumber *value;
+      // NOTE: this will likely change to a different result entry per response class
       if (qres.class == [ORKNumericQuestionResult class]) { //  ==  if (qres.questionType == ORKQuestionTypeInteger) {
         unit = ((ORKNumericQuestionResult*)qres).unit;
         value = ((ORKNumericQuestionResult*)qres).numericAnswer;
+      } else if (qres.class == [ORKBooleanQuestionResult class]) {
+        value = ((ORKBooleanQuestionResult*)qres).booleanAnswer;
       }
 
       NSMutableDictionary *questionResultEntry = [[NSMutableDictionary alloc] initWithObjectsAndKeys:
@@ -70,8 +116,8 @@
 //                                                  qres.description, @"description",
 //                                                  [df stringFromDate:qres.startDate], @"startDate",
 //                                                  [df stringFromDate:qres.endDate], @"endDate",
-                                                  unit, @"unit",
                                                   value, @"value",
+                                                  unit, @"unit",
                                                   nil
                                                   ];
       [questionResultEntries addObject:questionResultEntry];
@@ -88,11 +134,7 @@
     [finalResults addObject:entry];
   }
   
-  
-  
-  // Then, dismiss the task view controller.
   [self.viewController dismissViewControllerAnimated:YES completion:nil];
-  
   CDVPluginResult* pluginResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsArray:finalResults];
   [self.commandDelegate sendPluginResult:pluginResult callbackId:_command.callbackId];
 }

@@ -23,9 +23,35 @@
 <script type="text/javascript" src="js/index.js"></script>
 <script>
   function test() {
+    // for possible anserFormats, see ORKAnswerFormat.h
     window.plugins.researchkit.survey(
         {
-          // TODO add questions here
+          'instructionSteps' : [
+            {
+              'id': 'instruction1',
+              'title': 'instr 1',
+              'text': 'instrtext 1'
+            },
+            {
+              'id': 'instruction2',
+              'title': 'instr 2',
+              'text': 'instrtext 2'
+            }
+          ],
+          'questionSteps' : [
+            {
+              'id': 'q1',
+              'title': 'How old are you?',
+              'answerFormat': 'ORKNumericAnswerFormat', // or 'numeric'
+              'unit': 'years',
+              'minimum': 18
+            },
+            {
+              'id': 'q2',
+              'title': 'Are you sexy?',
+              'answerFormat' : 'ORKBooleanAnswerFormat' // or 'boolean'
+            }
+          ]
         },
         function(msg) {alert('ok: ' + JSON.stringify(msg))}, // success handler: results of survey
         function(msg) {alert('not ok: ' + JSON.stringify(msg))} // error handler with errorcode and localised reason
