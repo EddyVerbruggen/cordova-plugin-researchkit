@@ -2,19 +2,21 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8" />
-  <meta name="format-detection" content="telephone=no" />
-  <meta name="msapplication-tap-highlight" content="no" />
+  <meta charset="utf-8"/>
+  <meta name="format-detection" content="telephone=no"/>
+  <meta name="msapplication-tap-highlight" content="no"/>
   <!-- WARNING: for iOS 7, remove the width=device-width and height=device-height attributes. See https://issues.apache.org/jira/browse/CB-4323 -->
-  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi" />
-  <link rel="stylesheet" type="text/css" href="css/index.css" />
+  <meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width, height=device-height, target-densitydpi=device-dpi"/>
+  <link rel="stylesheet" type="text/css" href="css/index.css"/>
   <title>Hello World</title>
 </head>
 <body>
 <div class="app">
   <h1>Apache Cordova</h1>
+
   <div id="deviceready" class="blink">
     <p class="event listening">Connecting to Device</p>
+
     <p class="event received">Device is Ready</p>
     <button onclick="test()">test</button>
   </div>
@@ -23,10 +25,27 @@
 <script type="text/javascript" src="js/index.js"></script>
 <script>
   function test() {
-    // for possible anserFormats, see ORKAnswerFormat.h
     window.plugins.researchkit.survey(
         {
-          'instructionSteps' : [
+          // I think you'd either choose consent or instruction
+          'consentSteps': [
+            {
+              'id': 'consent overview',
+              'title': 'overview title',
+              'sectionType': 'ORKConsentSectionTypeOverview', // or 'overview'
+              'summary': 'overview summary',
+              'content': 'overview content' // optional, when 'learn more' is pressed
+            },
+            {
+              'id': 'consent2',
+              'title': 'data gathering title',
+              'sectionType': 'ORKConsentSectionTypeDataGathering', // or 'dataGathering'
+              'summary': 'data gathering summary',
+              'htmlContent': '<strong>html</strong> content', // optional
+              'content': 'data gathering content' // optional (htmlContent wins if both are set)
+            }
+          ],
+          'instructionSteps': [
             {
               'id': 'instruction1',
               'title': 'instr 1',
@@ -38,7 +57,8 @@
               'text': 'instrtext 2'
             }
           ],
-          'questionSteps' : [
+          // for possible anserFormats, see ORKAnswerFormat.h
+          'questionSteps': [
             {
               'id': 'q1',
               'title': 'How old are you?',
@@ -50,12 +70,16 @@
             {
               'id': 'q2',
               'title': 'Are you sexy?',
-              'answerFormat' : 'ORKBooleanAnswerFormat' // or 'boolean'
+              'answerFormat': 'ORKBooleanAnswerFormat' // or 'boolean'
             }
           ]
         },
-        function(msg) {alert('ok: ' + JSON.stringify(msg))}, // success handler: results of survey
-        function(msg) {alert('not ok: ' + JSON.stringify(msg))} // error handler with errorcode and localised reason
+        function (msg) {
+          alert('ok: ' + JSON.stringify(msg))
+        }, // success handler: results of survey
+        function (msg) {
+          alert('not ok: ' + JSON.stringify(msg))
+        } // error handler with errorcode and localised reason
     );
   }
 </script>
